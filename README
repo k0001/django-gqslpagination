@@ -1,0 +1,24 @@
+django-gqslpagination provides a paginator for Django QuerySets
+returning pages of sorted and grouped objects (i.e, GROUP BY).
+
+The number of objects on a page will be as close as the requested number as
+possible. Items from a same group are always on a same page. A single page can
+have items belonging to more than one group.
+
+You can find the latest version at http://github.com/k0001/django-gqslpagination
+
+Along with this project, you should have recieved a file named LICENSE with the
+licensing terms.
+
+Check the INSTALL file for install instructions
+
+
+Tests
+=====
+
+You can run them with::
+
+    python setup.py test
+
+
+
