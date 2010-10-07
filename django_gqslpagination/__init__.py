@@ -9,8 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 
 __all__ = 'GroupedQuerySetLaxPage', 'GroupedQuerySetLaxPaginator', 'EmptyPage'
 
-FIRST_PAGE = object()
-
 
 class GroupedQuerySetLaxPage(object):
     def __init__(self, qs, number, paginator, pagination, groups_counts,
@@ -94,15 +92,16 @@ class GroupedQuerySetLaxPaginator(object):
             self._backwards_lookup = '%s__lt' % grouping_field_name
             self._backwards_order = '-%s' % grouping_field_name
 
-    def page(self, number=FIRST_PAGE):
-        if number is FIRST_PAGE:
+    def page(self, number=None):
+        if number is None:
             try:
                 number = self._qs.values_list(self._grouping_field_name) \
                                  .order_by(self._forwards_order)[0:1].get()[0]
             except self._qs.model.DoesNotExist:
-                # empty QuerySet, let's set some random value so that the next
-                # queries don't fail. (Yes, hacky)
-                number = None
+                pass
+            else:
+                if number is None:
+                    raise ValueError(u"%s doesn't support NULL values in pagination" % self.__class__.__name__)
 
         forwards_qs = self._qs.values_list(self._grouping_field_name) \
                               .annotate(Count(self._grouping_field_name)) \
@@ -113,6 +112,7 @@ class GroupedQuerySetLaxPaginator(object):
                                .annotate(Count(self._grouping_field_name)) \
                                .filter(**{self._backwards_lookup: number}) \
                                .order_by(self._backwards_order)
+
 
         # We need to find these grouping values:
         # ..., prev, [start, ..., end], next, ...
